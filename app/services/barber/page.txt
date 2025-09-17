@@ -1,0 +1,3 @@
+export default function BarberServicePage() {
+  return <div>Barber Service Page</div>;
+}

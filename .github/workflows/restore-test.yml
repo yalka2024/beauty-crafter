@@ -1,0 +1,24 @@
+name: Automated Restore Test
+on:
+  schedule:
+    - cron: '0 4 * * 0' # Every Sunday at 4am UTC
+  workflow_dispatch:
+jobs:
+  restore-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: pnpm install
+      - name: Run restore test
+        run: |
+          # Find the latest backup file
+          LATEST_BACKUP=$(ls -t scripts/backup/*.bak | head -n1)
+          if [ -z "$LATEST_BACKUP" ]; then
+            echo "No backup file found!" && exit 1
+          fi
+          node scripts/backup-restore.js restore "$LATEST_BACKUP"

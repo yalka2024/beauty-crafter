@@ -1,0 +1,27 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: db-backup
+spec:
+  schedule: "0 2 * * *" # Every day at 2am UTC
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: db-backup
+            image: node:18
+            command: ["node", "/app/scripts/backup-restore.js", "backup"]
+            volumeMounts:
+            - name: app-scripts
+              mountPath: /app/scripts
+            - name: backup-storage
+              mountPath: /app/backup
+          restartPolicy: OnFailure
+          volumes:
+          - name: app-scripts
+            hostPath:
+              path: /path/to/your/scripts
+          - name: backup-storage
+            hostPath:
+              path: /path/to/your/backup

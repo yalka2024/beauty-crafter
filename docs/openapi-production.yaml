@@ -1,0 +1,1166 @@
+openapi: 3.0.3
+info:
+  title: Beauty Crafter Platform API
+  description: |
+    Enterprise-grade beauty services platform API with comprehensive security, 
+    multi-factor authentication, field-level encryption, and advanced monitoring.
+    
+    ## Features
+    - Multi-Factor Authentication (MFA/2FA)
+    - Field-level encryption for PII
+    - JWT token rotation
+    - API versioning
+    - Rate limiting
+    - Comprehensive audit logging
+    - Real-time monitoring and alerting
+    
+    ## Security
+    - All endpoints require authentication except registration
+    - MFA required for sensitive operations
+    - Rate limiting applied to all endpoints
+    - All PII data is encrypted at rest
+    - Comprehensive audit logging
+    
+    ## Rate Limits
+    - Authentication endpoints: 5 requests per minute
+    - General API endpoints: 100 requests per minute
+    - File upload endpoints: 10 requests per minute
+  version: 2.0.0
+  contact:
+    name: Beauty Crafter Support
+    email: support@beautycrafter.com
+    url: https://beautycrafter.com/support
+  license:
+    name: Proprietary
+    url: https://beautycrafter.com/terms
+
+servers:
+  - url: https://api.beautycrafter.com/v2
+    description: Production server
+  - url: https://staging-api.beautycrafter.com/v2
+    description: Staging server
+  - url: http://localhost:3000/api/v2
+    description: Development server
+
+security:
+  - BearerAuth: []
+  - ApiKeyAuth: []
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register new user
+      description: Create a new user account with encrypted PII data
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistration'
+            examples:
+              client_registration:
+                summary: Client Registration
+                value:
+                  name: "Jane Doe"
+                  email: "jane@example.com"
+                  phone: "+1234567890"
+                  password: "SecurePass123!"
+                  role: "CLIENT"
+              provider_registration:
+                summary: Provider Registration
+                value:
+                  name: "John Smith"
+                  email: "john@example.com"
+                  phone: "+1234567890"
+                  password: "SecurePass123!"
+                  role: "PROVIDER"
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserRegistrationResponse'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate user with optional MFA
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials or MFA required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/mfa/setup:
+    post:
+      tags:
+        - Authentication
+      summary: Setup MFA
+      description: Generate MFA secret and QR code for user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: string
+                  description: User ID (optional, uses session if not provided)
+      responses:
+        '200':
+          description: MFA setup successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MFASetupResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/mfa/verify:
+    post:
+      tags:
+        - Authentication
+      summary: Verify MFA token
+      description: Verify MFA token and optionally enable MFA
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MFAVerification'
+      responses:
+        '200':
+          description: MFA verification successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MFAVerificationResponse'
+        '400':
+          description: Invalid MFA token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      description: Get new access token using refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+                  description: Valid refresh token
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefreshResponse'
+        '401':
+          description: Invalid refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/profile:
+    get:
+      tags:
+        - Users
+      summary: Get user profile
+      description: Retrieve current user's profile with decrypted data
+      responses:
+        '200':
+          description: Profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Users
+      summary: Update user profile
+      description: Update user profile with encrypted PII data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfileUpdate'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /services:
+    get:
+      tags:
+        - Services
+      summary: List services
+      description: Get paginated list of available services
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: category
+          in: query
+          schema:
+            type: string
+            enum: [FACIAL, MASSAGE, NAIL, HAIR, BODY, OTHER]
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Services retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServicesListResponse'
+
+  /services/{serviceId}:
+    get:
+      tags:
+        - Services
+      summary: Get service details
+      description: Get detailed information about a specific service
+      parameters:
+        - name: serviceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Service details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+        '404':
+          description: Service not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /bookings:
+    get:
+      tags:
+        - Bookings
+      summary: List user bookings
+      description: Get paginated list of user's bookings
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [PENDING, CONFIRMED, CANCELLED, COMPLETED]
+      responses:
+        '200':
+          description: Bookings retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingsListResponse'
+
+    post:
+      tags:
+        - Bookings
+      summary: Create booking
+      description: Create a new service booking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingCreate'
+      responses:
+        '201':
+          description: Booking created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /bookings/{bookingId}:
+    get:
+      tags:
+        - Bookings
+      summary: Get booking details
+      description: Get detailed information about a specific booking
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Booking details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        '404':
+          description: Booking not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Bookings
+      summary: Update booking
+      description: Update booking details (status, notes, etc.)
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookingUpdate'
+      responses:
+        '200':
+          description: Booking updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /payments:
+    post:
+      tags:
+        - Payments
+      summary: Process payment
+      description: Process payment for a booking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentCreate'
+      responses:
+        '200':
+          description: Payment processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+        '400':
+          description: Payment processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /reviews:
+    get:
+      tags:
+        - Reviews
+      summary: List reviews
+      description: Get paginated list of reviews
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: serviceId
+          in: query
+          schema:
+            type: string
+        - name: providerId
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Reviews retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewsListResponse'
+
+    post:
+      tags:
+        - Reviews
+      summary: Create review
+      description: Create a new review for a service
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReviewCreate'
+      responses:
+        '201':
+          description: Review created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Review'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/users:
+    get:
+      tags:
+        - Admin
+      summary: List all users
+      description: Get paginated list of all users (admin only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [CLIENT, PROVIDER, ADMIN]
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, INACTIVE, SUSPENDED]
+      responses:
+        '200':
+          description: Users retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsersListResponse'
+        '403':
+          description: Forbidden - Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/analytics:
+    get:
+      tags:
+        - Admin
+      summary: Get platform analytics
+      description: Get comprehensive platform analytics (admin only)
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: period
+          in: query
+          schema:
+            type: string
+            enum: [day, week, month, quarter, year]
+            default: month
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Analytics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalyticsResponse'
+        '403':
+          description: Forbidden - Admin access required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /health:
+    get:
+      tags:
+        - System
+      summary: Health check
+      description: Check system health and status
+      security: []
+      responses:
+        '200':
+          description: System is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheckResponse'
+        '503':
+          description: System is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheckResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  schemas:
+    UserRegistration:
+      type: object
+      required:
+        - name
+        - email
+        - phone
+        - password
+        - role
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          description: User's full name
+        email:
+          type: string
+          format: email
+          description: User's email address
+        phone:
+          type: string
+          minLength: 10
+          maxLength: 20
+          description: User's phone number
+        password:
+          type: string
+          minLength: 8
+          maxLength: 100
+          description: User's password
+        role:
+          type: string
+          enum: [CLIENT, PROVIDER]
+          description: User's role
+
+    UserLogin:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        mfaToken:
+          type: string
+          description: MFA token (required if MFA is enabled)
+
+    MFAVerification:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          minLength: 6
+          maxLength: 8
+          description: MFA token from authenticator app
+        enable:
+          type: boolean
+          default: false
+          description: Whether to enable MFA after verification
+
+    UserRegistrationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            user:
+              $ref: '#/components/schemas/User'
+            session:
+              $ref: '#/components/schemas/Session'
+
+    MFASetupResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            secret:
+              type: string
+              description: MFA secret for manual entry
+            qrCodeUrl:
+              type: string
+              format: uri
+              description: QR code data URL for MFA setup
+            backupCodes:
+              type: array
+              items:
+                type: string
+              description: Backup codes for MFA recovery
+
+    MFAVerificationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            isValid:
+              type: boolean
+            isBackupCode:
+              type: boolean
+
+    TokenRefreshResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            accessToken:
+              type: string
+            refreshToken:
+              type: string
+            expiresIn:
+              type: integer
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+          enum: [CLIENT, PROVIDER, ADMIN]
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE, SUSPENDED]
+        mfaEnabled:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    UserProfile:
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - type: object
+          properties:
+            phone:
+              type: string
+            preferences:
+              type: object
+            emergencyContact:
+              type: object
+            medicalConditions:
+              type: array
+              items:
+                type: string
+            allergies:
+              type: array
+              items:
+                type: string
+
+    UserProfileUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        phone:
+          type: string
+          minLength: 10
+          maxLength: 20
+        preferences:
+          type: object
+        emergencyContact:
+          type: object
+        medicalConditions:
+          type: array
+          items:
+            type: string
+        allergies:
+          type: array
+          items:
+            type: string
+
+    Session:
+      type: object
+      properties:
+        expires:
+          type: string
+          format: date-time
+
+    Service:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+          enum: [FACIAL, MASSAGE, NAIL, HAIR, BODY, OTHER]
+        price:
+          type: number
+          format: float
+        duration:
+          type: integer
+          description: Duration in minutes
+        isActive:
+          type: boolean
+        providerId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    ServicesListResponse:
+      type: object
+      properties:
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/Service'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    Booking:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        serviceId:
+          type: string
+        providerId:
+          type: string
+        scheduledAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [PENDING, CONFIRMED, CANCELLED, COMPLETED]
+        notes:
+          type: string
+        totalAmount:
+          type: number
+          format: float
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    BookingCreate:
+      type: object
+      required:
+        - serviceId
+        - providerId
+        - scheduledAt
+      properties:
+        serviceId:
+          type: string
+        providerId:
+          type: string
+        scheduledAt:
+          type: string
+          format: date-time
+        notes:
+          type: string
+
+    BookingUpdate:
+      type: object
+      properties:
+        scheduledAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [PENDING, CONFIRMED, CANCELLED, COMPLETED]
+        notes:
+          type: string
+
+    BookingsListResponse:
+      type: object
+      properties:
+        bookings:
+          type: array
+          items:
+            $ref: '#/components/schemas/Booking'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: string
+        bookingId:
+          type: string
+        amount:
+          type: number
+          format: float
+        currency:
+          type: string
+          default: USD
+        status:
+          type: string
+          enum: [PENDING, COMPLETED, FAILED, REFUNDED]
+        paymentMethod:
+          type: string
+        transactionId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    PaymentCreate:
+      type: object
+      required:
+        - bookingId
+        - amount
+        - paymentMethod
+      properties:
+        bookingId:
+          type: string
+        amount:
+          type: number
+          format: float
+        paymentMethod:
+          type: string
+        currency:
+          type: string
+          default: USD
+
+    Review:
+      type: object
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        serviceId:
+          type: string
+        providerId:
+          type: string
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+
+    ReviewCreate:
+      type: object
+      required:
+        - serviceId
+        - providerId
+        - rating
+      properties:
+        serviceId:
+          type: string
+        providerId:
+          type: string
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+
+    ReviewsListResponse:
+      type: object
+      properties:
+        reviews:
+          type: array
+          items:
+            $ref: '#/components/schemas/Review'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    UsersListResponse:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    AnalyticsResponse:
+      type: object
+      properties:
+        period:
+          type: string
+        totalUsers:
+          type: integer
+        totalBookings:
+          type: integer
+        totalRevenue:
+          type: number
+          format: float
+        activeProviders:
+          type: integer
+        averageRating:
+          type: number
+          format: float
+        metrics:
+          type: object
+          additionalProperties: true
+
+    HealthCheckResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+        uptime:
+          type: number
+        database:
+          type: object
+          properties:
+            status:
+              type: string
+            responseTime:
+              type: number
+        redis:
+          type: object
+          properties:
+            status:
+              type: string
+            responseTime:
+              type: number
+        externalServices:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              status:
+                type: string
+              responseTime:
+                type: number
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        limit:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+        hasNext:
+          type: boolean
+        hasPrev:
+          type: boolean
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: object
+        code:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Users
+    description: User profile management
+  - name: Services
+    description: Service catalog and management
+  - name: Bookings
+    description: Booking management
+  - name: Payments
+    description: Payment processing
+  - name: Reviews
+    description: Review and rating system
+  - name: Admin
+    description: Administrative functions
+  - name: System
+    description: System health and monitoring

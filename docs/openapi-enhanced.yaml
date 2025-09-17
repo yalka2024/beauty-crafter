@@ -1,0 +1,1293 @@
+openapi: 3.0.3
+info:
+  title: Beauty Crafter API
+  description: |
+    Comprehensive API for the Beauty Crafter platform - a marketplace connecting beauty service providers with clients.
+    
+    ## Features
+    - User authentication and authorization
+    - Service provider management
+    - Booking and scheduling system
+    - Payment processing
+    - Review and rating system
+    - AI-powered beauty consultations
+    - Real-time notifications
+    - Multi-factor authentication
+    
+    ## Authentication
+    This API uses JWT tokens for authentication. Include the token in the Authorization header:
+    ```
+    Authorization: Bearer <your-token>
+    ```
+    
+    ## Rate Limiting
+    API requests are rate limited to prevent abuse. Rate limit headers are included in responses:
+    - `X-RateLimit-Limit`: Maximum requests per window
+    - `X-RateLimit-Remaining`: Remaining requests in current window
+    - `X-RateLimit-Reset`: Time when the rate limit resets
+    
+    ## API Versions
+    - v1: Current stable version
+    - v2: Latest version with enhanced features
+    - v0: Deprecated (will be sunset on 2024-06-01)
+    
+  version: 2.0.0
+  contact:
+    name: Beauty Crafter Support
+    email: support@beautycrafter.com
+    url: https://beautycrafter.com/support
+  license:
+    name: Proprietary
+    url: https://beautycrafter.com/terms
+
+servers:
+  - url: https://api.beautycrafter.com/v2
+    description: Production server
+  - url: https://staging-api.beautycrafter.com/v2
+    description: Staging server
+  - url: http://localhost:3000/api/v2
+    description: Development server
+
+security:
+  - BearerAuth: []
+  - ApiKeyAuth: []
+
+paths:
+  /health:
+    get:
+      tags:
+        - System
+      summary: Health check
+      description: Check the health status of the API
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  timestamp:
+                    type: string
+                    format: date-time
+                  version:
+                    type: string
+                    example: 2.0.0
+                  uptime:
+                    type: number
+                    example: 3600
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Register new user
+      description: Create a new user account
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Login user
+      description: Authenticate user and return JWT tokens
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      description: Get new access token using refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+                  example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+              required:
+                - refreshToken
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Invalid refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/mfa/setup:
+    post:
+      tags:
+        - Authentication
+      summary: Setup MFA
+      description: Generate MFA configuration for user
+      responses:
+        '200':
+          description: MFA setup initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MFASetupResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/mfa/verify:
+    post:
+      tags:
+        - Authentication
+      summary: Verify MFA token
+      description: Verify MFA token and optionally enable MFA
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+                  example: 123456
+                enable:
+                  type: boolean
+                  default: false
+              required:
+                - token
+      responses:
+        '200':
+          description: MFA verification successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MFAVerifyResponse'
+        '400':
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /users/me:
+    get:
+      tags:
+        - Users
+      summary: Get current user profile
+      description: Retrieve the current authenticated user's profile
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Users
+      summary: Update user profile
+      description: Update the current user's profile information
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+        '400':
+          description: Invalid input data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /providers:
+    get:
+      tags:
+        - Providers
+      summary: List service providers
+      description: Get a paginated list of service providers with filtering options
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: type
+          in: query
+          description: Filter by provider type
+          schema:
+            type: string
+            enum: [BARBER, NAIL_TECHNICIAN, MASSAGE_THERAPIST, COSMETIC_DERMATOLOGIST, ESTHETICIAN, HAIR_STYLIST]
+        - name: location
+          in: query
+          description: Filter by location (city, state, or zip code)
+          schema:
+            type: string
+        - name: minRating
+          in: query
+          description: Minimum rating filter
+          schema:
+            type: number
+            minimum: 1
+            maximum: 5
+        - name: available
+          in: query
+          description: Filter by availability
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Providers retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProviders'
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /providers/{id}:
+    get:
+      tags:
+        - Providers
+      summary: Get provider details
+      description: Get detailed information about a specific provider
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Provider ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Provider details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProviderDetails'
+        '404':
+          description: Provider not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /bookings:
+    get:
+      tags:
+        - Bookings
+      summary: List user bookings
+      description: Get a paginated list of bookings for the current user
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: status
+          in: query
+          description: Filter by booking status
+          schema:
+            type: string
+            enum: [PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED, NO_SHOW]
+      responses:
+        '200':
+          description: Bookings retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBookings'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      tags:
+        - Bookings
+      summary: Create new booking
+      description: Create a new service booking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookingRequest'
+      responses:
+        '201':
+          description: Booking created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        '400':
+          description: Invalid booking data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /bookings/{id}:
+    get:
+      tags:
+        - Bookings
+      summary: Get booking details
+      description: Get detailed information about a specific booking
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Booking ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Booking details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        '404':
+          description: Booking not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Bookings
+      summary: Update booking
+      description: Update booking details (limited to certain fields)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Booking ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBookingRequest'
+      responses:
+        '200':
+          description: Booking updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+        '400':
+          description: Invalid update data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Booking not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /payments:
+    post:
+      tags:
+        - Payments
+      summary: Process payment
+      description: Process payment for a booking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '200':
+          description: Payment processed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '400':
+          description: Invalid payment data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /ai/consultation:
+    post:
+      tags:
+        - AI Services
+      summary: AI beauty consultation
+      description: Get AI-powered beauty consultation and recommendations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIConsultationRequest'
+      responses:
+        '200':
+          description: Consultation completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIConsultationResponse'
+        '400':
+          description: Invalid consultation data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for authentication
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for external integrations
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: VALIDATION_ERROR
+            message:
+              type: string
+              example: Invalid input data
+            timestamp:
+              type: string
+              format: date-time
+            version:
+              type: string
+              example: v2
+        success:
+          type: boolean
+          example: false
+
+    ValidationError:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+        - type: object
+          properties:
+            error:
+              type: object
+              properties:
+                code:
+                  type: string
+                  example: VALIDATION_ERROR
+                message:
+                  type: string
+                  example: Validation failed
+                details:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      field:
+                        type: string
+                      message:
+                        type: string
+                      code:
+                        type: string
+
+    RegisterRequest:
+      type: object
+      required:
+        - name
+        - email
+        - phone
+        - password
+        - role
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+          example: John Doe
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        phone:
+          type: string
+          minLength: 10
+          maxLength: 20
+          example: +1234567890
+        password:
+          type: string
+          minLength: 8
+          maxLength: 100
+          example: securePassword123
+        role:
+          type: string
+          enum: [CLIENT, PROVIDER]
+          example: CLIENT
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        password:
+          type: string
+          example: securePassword123
+
+    UserResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: User created successfully
+        user:
+          $ref: '#/components/schemas/User'
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Login successful
+        user:
+          $ref: '#/components/schemas/User'
+        tokens:
+          $ref: '#/components/schemas/TokenPair'
+
+    TokenResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        tokens:
+          $ref: '#/components/schemas/TokenPair'
+
+    TokenPair:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        refreshToken:
+          type: string
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        expiresIn:
+          type: integer
+          example: 900
+
+    MFASetupResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            secret:
+              type: string
+              example: JBSWY3DPEHPK3PXP
+            qrCodeUrl:
+              type: string
+              format: data-url
+              example: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
+            backupCodes:
+              type: array
+              items:
+                type: string
+              example: [ABC12345, DEF67890, GHI13579]
+
+    MFAVerifyResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: MFA enabled successfully
+        backupCodeUsed:
+          type: boolean
+          example: false
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          example: clx1234567890
+        email:
+          type: string
+          format: email
+          example: john@example.com
+        name:
+          type: string
+          example: John Doe
+        phone:
+          type: string
+          example: +1234567890
+        role:
+          type: string
+          enum: [CLIENT, PROVIDER, ADMIN]
+          example: CLIENT
+        status:
+          type: string
+          enum: [ACTIVE, PENDING, SUSPENDED, BANNED]
+          example: ACTIVE
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    UserProfile:
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - type: object
+          properties:
+            client:
+              $ref: '#/components/schemas/ClientProfile'
+            provider:
+              $ref: '#/components/schemas/ProviderProfile'
+
+    ClientProfile:
+      type: object
+      properties:
+        preferences:
+          type: object
+        emergencyContact:
+          type: string
+        medicalConditions:
+          type: array
+          items:
+            type: string
+        allergies:
+          type: array
+          items:
+            type: string
+
+    ProviderProfile:
+      type: object
+      properties:
+        providerType:
+          type: array
+          items:
+            type: string
+            enum: [BARBER, NAIL_TECHNICIAN, MASSAGE_THERAPIST, COSMETIC_DERMATOLOGIST, ESTHETICIAN, HAIR_STYLIST]
+        businessName:
+          type: string
+        businessLicense:
+          type: string
+        yearsOfExperience:
+          type: integer
+        specialties:
+          type: array
+          items:
+            type: string
+        bio:
+          type: string
+        hourlyRate:
+          type: number
+          format: decimal
+        travelRadius:
+          type: integer
+        acceptsHomeService:
+          type: boolean
+        acceptsSalonService:
+          type: boolean
+        isAvailable:
+          type: boolean
+        rating:
+          type: number
+          format: decimal
+        totalReviews:
+          type: integer
+        completedServices:
+          type: integer
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        phone:
+          type: string
+          minLength: 10
+          maxLength: 20
+        avatar:
+          type: string
+          format: uri
+
+    PaginatedProviders:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProviderSummary'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+          example: v2
+
+    ProviderSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        businessName:
+          type: string
+        providerType:
+          type: array
+          items:
+            type: string
+        rating:
+          type: number
+          format: decimal
+        totalReviews:
+          type: integer
+        hourlyRate:
+          type: number
+          format: decimal
+        specialties:
+          type: array
+          items:
+            type: string
+        isAvailable:
+          type: boolean
+        avatar:
+          type: string
+          format: uri
+
+    ProviderDetails:
+      allOf:
+        - $ref: '#/components/schemas/ProviderSummary'
+        - type: object
+          properties:
+            bio:
+              type: string
+            yearsOfExperience:
+              type: integer
+            travelRadius:
+              type: integer
+            acceptsHomeService:
+              type: boolean
+            acceptsSalonService:
+              type: boolean
+            services:
+              type: array
+              items:
+                $ref: '#/components/schemas/Service'
+            portfolio:
+              type: array
+              items:
+                $ref: '#/components/schemas/PortfolioItem'
+            reviews:
+              type: array
+              items:
+                $ref: '#/components/schemas/Review'
+
+    Service:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        subcategory:
+          type: string
+        duration:
+          type: integer
+        price:
+          type: number
+          format: decimal
+        location:
+          type: string
+          enum: [HOME, SALON, BOTH]
+        isActive:
+          type: boolean
+
+    PortfolioItem:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        imageUrl:
+          type: string
+          format: uri
+        category:
+          type: string
+        isPublic:
+          type: boolean
+
+    Review:
+      type: object
+      properties:
+        id:
+          type: string
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+        comment:
+          type: string
+        isPublic:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        client:
+          type: object
+          properties:
+            name:
+              type: string
+            avatar:
+              type: string
+              format: uri
+
+    PaginatedBookings:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Booking'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+          example: v2
+
+    Booking:
+      type: object
+      properties:
+        id:
+          type: string
+        clientId:
+          type: string
+        providerId:
+          type: string
+        serviceId:
+          type: string
+        scheduledDate:
+          type: string
+          format: date-time
+        startTime:
+          type: string
+          format: time
+        endTime:
+          type: string
+          format: time
+        duration:
+          type: integer
+        location:
+          type: string
+          enum: [HOME, SALON, BOTH]
+        address:
+          type: string
+        notes:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED, NO_SHOW]
+        totalAmount:
+          type: number
+          format: decimal
+        commission:
+          type: number
+          format: decimal
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        service:
+          $ref: '#/components/schemas/Service'
+        provider:
+          $ref: '#/components/schemas/ProviderSummary'
+
+    CreateBookingRequest:
+      type: object
+      required:
+        - providerId
+        - serviceId
+        - scheduledDate
+        - startTime
+        - duration
+        - location
+      properties:
+        providerId:
+          type: string
+        serviceId:
+          type: string
+        scheduledDate:
+          type: string
+          format: date-time
+        startTime:
+          type: string
+          format: time
+        duration:
+          type: integer
+        location:
+          type: string
+          enum: [HOME, SALON, BOTH]
+        address:
+          type: string
+        notes:
+          type: string
+        addOns:
+          type: array
+          items:
+            type: string
+
+    UpdateBookingRequest:
+      type: object
+      properties:
+        notes:
+          type: string
+        status:
+          type: string
+          enum: [PENDING, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED, NO_SHOW]
+
+    PaymentRequest:
+      type: object
+      required:
+        - bookingId
+        - amount
+        - paymentMethodId
+      properties:
+        bookingId:
+          type: string
+        amount:
+          type: number
+          format: decimal
+        currency:
+          type: string
+          default: USD
+        paymentMethodId:
+          type: string
+        savePaymentMethod:
+          type: boolean
+          default: false
+
+    PaymentResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        payment:
+          type: object
+          properties:
+            id:
+              type: string
+            status:
+              type: string
+              enum: [PENDING, PROCESSING, COMPLETED, FAILED, REFUNDED]
+            amount:
+              type: number
+              format: decimal
+            currency:
+              type: string
+            stripePaymentId:
+              type: string
+            createdAt:
+              type: string
+              format: date-time
+
+    AIConsultationRequest:
+      type: object
+      required:
+        - type
+        - data
+      properties:
+        type:
+          type: string
+          enum: [SKIN_ANALYSIS, BEAUTY_CONSULTATION, TREATMENT_PLANNING, PRODUCT_RECOMMENDATIONS]
+        data:
+          type: object
+          properties:
+            skinType:
+              type: string
+            concerns:
+              type: array
+              items:
+                type: string
+            age:
+              type: integer
+            gender:
+              type: string
+            images:
+              type: array
+              items:
+                type: string
+                format: uri
+
+    AIConsultationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        consultation:
+          type: object
+          properties:
+            id:
+              type: string
+            type:
+              type: string
+            recommendations:
+              type: array
+              items:
+                type: object
+                properties:
+                  category:
+                    type: string
+                  title:
+                    type: string
+                  description:
+                    type: string
+                  confidence:
+                    type: number
+                    format: decimal
+            analysis:
+              type: object
+            createdAt:
+              type: string
+              format: date-time
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 20
+        total:
+          type: integer
+          example: 100
+        totalPages:
+          type: integer
+          example: 5
+        hasNext:
+          type: boolean
+          example: true
+        hasPrev:
+          type: boolean
+          example: false
+
+tags:
+  - name: System
+    description: System health and status endpoints
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Users
+    description: User profile management
+  - name: Providers
+    description: Service provider management
+  - name: Bookings
+    description: Booking and scheduling system
+  - name: Payments
+    description: Payment processing
+  - name: AI Services
+    description: AI-powered beauty consultations
+  - name: Reviews
+    description: Review and rating system
+  - name: Notifications
+    description: Real-time notifications

@@ -1,0 +1,33 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: beauty-crafter-servicemonitor
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: beauty-crafter
+  endpoints:
+  - port: http
+    path: /api/metrics
+    interval: 30s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: beauty-crafter-alerts
+  labels:
+    release: prometheus
+spec:
+  groups:
+  - name: beauty-crafter.rules
+    rules:
+    - alert: HighErrorRate
+      expr: rate(http_requests_total{job="beauty-crafter",status=~"5.."}[5m]) > 0.05
+      for: 5m
+      labels:
+        severity: critical
+      annotations:
+        summary: "High error rate detected on beauty-crafter"
+        description: "More than 5% of requests are failing with 5xx errors."

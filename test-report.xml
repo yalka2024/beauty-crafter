@@ -1,0 +1,507 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testExecutions version="1">
+  <file path="C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security-basic.test.ts">
+    <testCase name="Security Basic Tests Input Validation should validate email addresses" duration="17">
+      <failure message="Error: expect(received).toBe(expected) // Object.is equality"><![CDATA[Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: false
+Received: true
+    at toBe (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security-basic.test.ts:50:40)
+    at Array.forEach (<anonymous>)
+    at Object.forEach (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security-basic.test.ts:48:21)
+    at Promise.finally.completed (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\jest-cli\node_modules\jest-circus\build\jestAdapterInit.js:1559:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\jest-cli\node_modules\jest-circus\build\jestAdapterInit.js:1499:10)
+    at _callCircusTest (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\jest-cli\node_modules\jest-circus\build\jestAdapterInit.js:1009:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\jest-cli\node_modules\jest-circus\build\jestAdapterInit.js:949:3)
+    at _runTestsForDescribeBlock (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\jest-cli\node_modules\jest-circus\build\jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\jest-cli\node_modules\jest-circus\build\jestAdapterInit.js:829:11)
+    at _runTestsForDescribeBlock (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\jest-cli\node_modules\jest-circus\build\jestAdapterInit.js:829:11)
+    at run (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\jest-cli\node_modules\jest-circus\build\jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\jest-cli\node_modules\jest-circus\build\jestAdapterInit.js:1920:21)
+    at jestAdapter (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\jest-cli\node_modules\jest-circus\build\runner.js:101:19)
+    at runTestInternal (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\jest-cli\node_modules\jest-runner\build\testWorker.js:275:16)
+    at runTest (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\jest-cli\node_modules\jest-runner\build\testWorker.js:343:7)
+    at Object.worker (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\jest-cli\node_modules\jest-runner\build\testWorker.js:497:12)]]></failure>
+    </testCase>
+    <testCase name="Security Basic Tests Input Validation should validate passwords" duration="4"/>
+    <testCase name="Security Basic Tests Input Validation should sanitize HTML input" duration="3"/>
+    <testCase name="Security Basic Tests Security Headers should generate proper security headers" duration="1"/>
+    <testCase name="Security Basic Tests Rate Limiting should track request counts" duration="1"/>
+  </file>
+  <file path="C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\lib\security-headers.test.ts">
+    <testCase name="Security Headers generateCSPHeader should generate CSP header with all directives" duration="8"/>
+    <testCase name="Security Headers generateCSPHeader should handle empty arrays gracefully" duration="1"/>
+    <testCase name="Security Headers generateFeaturePolicyHeader should generate feature policy header with all features" duration="2"/>
+    <testCase name="Security Headers generateFeaturePolicyHeader should handle custom feature policies" duration="2"/>
+    <testCase name="Security Headers generateHSTSHeader should generate HSTS header with all options enabled" duration="2"/>
+    <testCase name="Security Headers generateHSTSHeader should generate HSTS header with partial options" duration="2"/>
+    <testCase name="Security Headers applySecurityHeaders should apply all security headers to response" duration="8"/>
+    <testCase name="Security Headers applySecurityHeaders should use custom configuration when provided" duration="2"/>
+    <testCase name="Security Headers applySecurityHeaders should handle development vs production configurations" duration="2"/>
+    <testCase name="Security Headers createSecurityMiddleware should create middleware function that applies security headers" duration="3"/>
+    <testCase name="Security Headers createSecurityMiddleware should use custom configuration when provided" duration="2"/>
+    <testCase name="Security Headers Configuration Objects should have valid default configuration" duration="1"/>
+    <testCase name="Security Headers Configuration Objects should have valid production configuration" duration="0"/>
+    <testCase name="Security Headers Configuration Objects should have valid development configuration" duration="1"/>
+    <testCase name="Security Headers Edge Cases should handle empty configuration gracefully" duration="2"/>
+    <testCase name="Security Headers Edge Cases should handle malformed URLs gracefully" duration="1"/>
+    <testCase name="Security Headers Security Validation should prevent XSS attacks with proper CSP" duration="1"/>
+    <testCase name="Security Headers Security Validation should prevent clickjacking with X-Frame-Options" duration="1"/>
+    <testCase name="Security Headers Security Validation should prevent MIME type sniffing" duration="1"/>
+    <testCase name="Security Headers Security Validation should enable XSS protection" duration="1"/>
+  </file>
+  <file path="C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\lib\security-middleware.test.ts">
+    <testCase name="SecurityMiddleware Singleton Pattern should return the same instance" duration="7"/>
+    <testCase name="SecurityMiddleware Configuration should load configuration from environment variables" duration="3"/>
+    <testCase name="SecurityMiddleware Configuration should have default suspicious patterns" duration="3"/>
+    <testCase name="SecurityMiddleware Request Processing should allow valid requests" duration="6"/>
+    <testCase name="SecurityMiddleware Request Processing should block requests from blocked IPs" duration="3"/>
+    <testCase name="SecurityMiddleware Request Processing should block oversized requests" duration="4"/>
+    <testCase name="SecurityMiddleware CSRF Protection should generate CSRF tokens for state-changing methods" duration="9">
+      <failure message="Error: expect(received).toBeDefined()"><![CDATA[Error: expect(received).toBeDefined()
+
+Received: undefined
+    at Object.toBeDefined (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\lib\security-middleware.test.ts:245:32)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)]]></failure>
+    </testCase>
+    <testCase name="SecurityMiddleware CSRF Protection should not generate CSRF tokens for GET requests" duration="7"/>
+    <testCase name="SecurityMiddleware CSRF Protection should validate CSRF tokens correctly" duration="3">
+      <failure message="Error: expect(received).toBe(expected) // Object.is equality"><![CDATA[Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: false
+    at Object.toBe (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\lib\security-middleware.test.ts:266:23)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)]]></failure>
+    </testCase>
+    <testCase name="SecurityMiddleware CSRF Protection should prevent CSRF token reuse" duration="2">
+      <failure message="Error: expect(received).toBe(expected) // Object.is equality"><![CDATA[Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: true
+Received: false
+    at Object.toBe (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\lib\security-middleware.test.ts:287:24)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)]]></failure>
+    </testCase>
+    <testCase name="SecurityMiddleware CSRF Protection should handle expired CSRF tokens" duration="2"/>
+    <testCase name="SecurityMiddleware Threat Detection should detect XSS patterns in request body" duration="2"/>
+    <testCase name="SecurityMiddleware Threat Detection should detect SQL injection patterns" duration="2"/>
+    <testCase name="SecurityMiddleware Threat Detection should detect suspicious headers" duration="3"/>
+    <testCase name="SecurityMiddleware Threat Detection should detect path traversal attempts" duration="1"/>
+    <testCase name="SecurityMiddleware Rate Limiting should allow requests within rate limit" duration="13"/>
+    <testCase name="SecurityMiddleware Rate Limiting should block requests exceeding rate limit" duration="20">
+      <failure message="Error: expect(received).toBe(expected) // Object.is equality"><![CDATA[Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: false
+Received: true
+    at Object.toBe (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\lib\security-middleware.test.ts:411:30)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)]]></failure>
+    </testCase>
+    <testCase name="SecurityMiddleware Rate Limiting should reset rate limit after window expires" duration="248"/>
+    <testCase name="SecurityMiddleware Security Headers should generate security headers" duration="2"/>
+    <testCase name="SecurityMiddleware Security Headers should generate Content Security Policy when enabled" duration="2"/>
+    <testCase name="SecurityMiddleware Security Headers should generate XSS protection headers" duration="1"/>
+    <testCase name="SecurityMiddleware Security Headers should generate frame options headers" duration="1"/>
+    <testCase name="SecurityMiddleware IP Management should block and unblock IP addresses" duration="2"/>
+    <testCase name="SecurityMiddleware IP Management should handle unblocking non-blocked IPs" duration="1"/>
+    <testCase name="SecurityMiddleware Threat Logging should log security threats" duration="6"/>
+    <testCase name="SecurityMiddleware Threat Logging should maintain threat log size limits" duration="17"/>
+    <testCase name="SecurityMiddleware Cleanup Processes should clean up expired CSRF tokens" duration="3"/>
+    <testCase name="SecurityMiddleware Cleanup Processes should clean up old threat logs" duration="1"/>
+    <testCase name="SecurityMiddleware Statistics and Reporting should provide security statistics" duration="3"/>
+    <testCase name="SecurityMiddleware Statistics and Reporting should provide recent threats" duration="2"/>
+    <testCase name="SecurityMiddleware Error Handling should handle processing errors gracefully" duration="2">
+      <failure message="Error: expect(received).toBe(expected) // Object.is equality"><![CDATA[Error: expect(received).toBe(expected) // Object.is equality
+
+Expected: false
+Received: true
+    at Object.toBe (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\lib\security-middleware.test.ts:647:30)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)]]></failure>
+    </testCase>
+    <testCase name="SecurityMiddleware Error Handling should log processing errors" duration="3">
+      <failure message="Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)"><![CDATA[Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+Expected: "Security middleware error", Any<Object>
+
+Number of calls: 0
+    at Object.toHaveBeenCalledWith (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\lib\security-middleware.test.ts:668:28)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)]]></failure>
+    </testCase>
+    <testCase name="SecurityMiddleware Performance Monitoring should record security metrics" duration="2"/>
+    <testCase name="SecurityMiddleware Performance Monitoring should record blocked request metrics" duration="4"/>
+    <testCase name="SecurityMiddleware Performance Monitoring should record threat detection metrics" duration="2"/>
+    <testCase name="Global Security Middleware Instance should export a global security middleware instance" duration="1"/>
+    <testCase name="Global Security Middleware Instance should be the same instance as getInstance()" duration="7">
+      <failure message="Error: expect(received).toBe(expected) // Object.is equality"><![CDATA[Error: expect(received).toBe(expected) // Object.is equality
+
+- Expected  - 5
++ Received  + 5
+
+@@ -1,18 +1,18 @@
+  SecurityMiddleware {
+    "blockedIPs": Set {},
+    "config": Object {
+      "allowedOrigins": Array [
+-       "https://example.com",
+-       "https://test.com",
++       "http://localhost:3000",
++       "http://localhost:3003",
+      ],
+      "blockedIPs": Array [],
+      "contentSecurityPolicy": true,
+-     "csrfEnabled": false,
++     "csrfEnabled": true,
+      "csrfTokenExpiry": 3600000,
+-     "maxRequestSize": 5242880,
+-     "rateLimitEnabled": false,
++     "maxRequestSize": 10485760,
++     "rateLimitEnabled": true,
+      "suspiciousPatterns": Array [
+        /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
+        /javascript:/gi,
+        /on\w+\s*=/gi,
+        /<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi,
+    at Object.toBe (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\lib\security-middleware.test.ts:736:32)
+    at Promise.finally.completed (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\jest-cli\node_modules\jest-circus\build\jestAdapterInit.js:1559:28)
+    at new Promise (<anonymous>)
+    at callAsyncCircusFn (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\jest-cli\node_modules\jest-circus\build\jestAdapterInit.js:1499:10)
+    at _callCircusTest (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\jest-cli\node_modules\jest-circus\build\jestAdapterInit.js:1009:40)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at _runTest (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\jest-cli\node_modules\jest-circus\build\jestAdapterInit.js:949:3)
+    at _runTestsForDescribeBlock (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\jest-cli\node_modules\jest-circus\build\jestAdapterInit.js:839:13)
+    at _runTestsForDescribeBlock (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\jest-cli\node_modules\jest-circus\build\jestAdapterInit.js:829:11)
+    at run (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\jest-cli\node_modules\jest-circus\build\jestAdapterInit.js:757:3)
+    at runAndTransformResultsToJestFormat (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\jest-cli\node_modules\jest-circus\build\jestAdapterInit.js:1920:21)
+    at jestAdapter (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\jest-cli\node_modules\jest-circus\build\runner.js:101:19)
+    at runTestInternal (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\jest-cli\node_modules\jest-runner\build\testWorker.js:275:16)
+    at runTest (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\jest-cli\node_modules\jest-runner\build\testWorker.js:343:7)
+    at Object.worker (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\jest-cli\node_modules\jest-runner\build\testWorker.js:497:12)]]></failure>
+    </testCase>
+  </file>
+  <file path="C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security.test.ts">
+    <testCase name="Security Integration Tests MFA Security should generate secure MFA secrets" duration="28">
+      <failure message="PrismaClientInitializationError: "><![CDATA[PrismaClientInitializationError: 
+Invalid `prisma.user.deleteMany()` invocation:
+
+
+Authentication failed against database server, the provided database credentials for `username` are not valid.
+
+Please make sure to provide valid database credentials for the database server at the configured address.
+    at ei.handleRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:242:13)
+    at ei.handleAndLogRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at a (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at Object.<anonymous> (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security.test.ts:13:5)]]></failure>
+    </testCase>
+    <testCase name="Security Integration Tests MFA Security should store MFA data securely in database" duration="0">
+      <failure message="PrismaClientInitializationError: "><![CDATA[PrismaClientInitializationError: 
+Invalid `prisma.user.deleteMany()` invocation:
+
+
+Authentication failed against database server, the provided database credentials for `username` are not valid.
+
+Please make sure to provide valid database credentials for the database server at the configured address.
+    at ei.handleRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:242:13)
+    at ei.handleAndLogRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at a (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at Object.<anonymous> (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security.test.ts:13:5)]]></failure>
+    </testCase>
+    <testCase name="Security Integration Tests MFA Security should verify TOTP tokens securely" duration="1">
+      <failure message="PrismaClientInitializationError: "><![CDATA[PrismaClientInitializationError: 
+Invalid `prisma.user.deleteMany()` invocation:
+
+
+Authentication failed against database server, the provided database credentials for `username` are not valid.
+
+Please make sure to provide valid database credentials for the database server at the configured address.
+    at ei.handleRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:242:13)
+    at ei.handleAndLogRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at a (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at Object.<anonymous> (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security.test.ts:13:5)]]></failure>
+    </testCase>
+    <testCase name="Security Integration Tests MFA Security should handle backup codes securely" duration="0">
+      <failure message="PrismaClientInitializationError: "><![CDATA[PrismaClientInitializationError: 
+Invalid `prisma.user.deleteMany()` invocation:
+
+
+Authentication failed against database server, the provided database credentials for `username` are not valid.
+
+Please make sure to provide valid database credentials for the database server at the configured address.
+    at ei.handleRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:242:13)
+    at ei.handleAndLogRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at a (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at Object.<anonymous> (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security.test.ts:13:5)]]></failure>
+    </testCase>
+    <testCase name="Security Integration Tests JWT Security should generate secure token pairs" duration="0">
+      <failure message="PrismaClientInitializationError: "><![CDATA[PrismaClientInitializationError: 
+Invalid `prisma.user.deleteMany()` invocation:
+
+
+Authentication failed against database server, the provided database credentials for `username` are not valid.
+
+Please make sure to provide valid database credentials for the database server at the configured address.
+    at ei.handleRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:242:13)
+    at ei.handleAndLogRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at a (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at Object.<anonymous> (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security.test.ts:13:5)]]></failure>
+    </testCase>
+    <testCase name="Security Integration Tests JWT Security should verify access tokens securely" duration="0">
+      <failure message="PrismaClientInitializationError: "><![CDATA[PrismaClientInitializationError: 
+Invalid `prisma.user.deleteMany()` invocation:
+
+
+Authentication failed against database server, the provided database credentials for `username` are not valid.
+
+Please make sure to provide valid database credentials for the database server at the configured address.
+    at ei.handleRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:242:13)
+    at ei.handleAndLogRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at a (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at Object.<anonymous> (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security.test.ts:13:5)]]></failure>
+    </testCase>
+    <testCase name="Security Integration Tests JWT Security should rotate refresh tokens securely" duration="1">
+      <failure message="PrismaClientInitializationError: "><![CDATA[PrismaClientInitializationError: 
+Invalid `prisma.user.deleteMany()` invocation:
+
+
+Authentication failed against database server, the provided database credentials for `username` are not valid.
+
+Please make sure to provide valid database credentials for the database server at the configured address.
+    at ei.handleRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:242:13)
+    at ei.handleAndLogRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at a (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at Object.<anonymous> (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security.test.ts:13:5)]]></failure>
+    </testCase>
+    <testCase name="Security Integration Tests JWT Security should store refresh tokens securely in database" duration="0">
+      <failure message="PrismaClientInitializationError: "><![CDATA[PrismaClientInitializationError: 
+Invalid `prisma.user.deleteMany()` invocation:
+
+
+Authentication failed against database server, the provided database credentials for `username` are not valid.
+
+Please make sure to provide valid database credentials for the database server at the configured address.
+    at ei.handleRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:242:13)
+    at ei.handleAndLogRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at a (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at Object.<anonymous> (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security.test.ts:13:5)]]></failure>
+    </testCase>
+    <testCase name="Security Integration Tests Field-Level Encryption should encrypt sensitive data securely" duration="1">
+      <failure message="PrismaClientInitializationError: "><![CDATA[PrismaClientInitializationError: 
+Invalid `prisma.user.deleteMany()` invocation:
+
+
+Authentication failed against database server, the provided database credentials for `username` are not valid.
+
+Please make sure to provide valid database credentials for the database server at the configured address.
+    at ei.handleRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:242:13)
+    at ei.handleAndLogRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at a (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at Object.<anonymous> (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security.test.ts:13:5)]]></failure>
+    </testCase>
+    <testCase name="Security Integration Tests Field-Level Encryption should decrypt data correctly" duration="0">
+      <failure message="PrismaClientInitializationError: "><![CDATA[PrismaClientInitializationError: 
+Invalid `prisma.user.deleteMany()` invocation:
+
+
+Authentication failed against database server, the provided database credentials for `username` are not valid.
+
+Please make sure to provide valid database credentials for the database server at the configured address.
+    at ei.handleRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:242:13)
+    at ei.handleAndLogRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at a (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at Object.<anonymous> (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security.test.ts:13:5)]]></failure>
+    </testCase>
+    <testCase name="Security Integration Tests Field-Level Encryption should handle empty values gracefully" duration="0">
+      <failure message="PrismaClientInitializationError: "><![CDATA[PrismaClientInitializationError: 
+Invalid `prisma.user.deleteMany()` invocation:
+
+
+Authentication failed against database server, the provided database credentials for `username` are not valid.
+
+Please make sure to provide valid database credentials for the database server at the configured address.
+    at ei.handleRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:242:13)
+    at ei.handleAndLogRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at a (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at Object.<anonymous> (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security.test.ts:13:5)]]></failure>
+    </testCase>
+    <testCase name="Security Integration Tests Field-Level Encryption should generate secure random values" duration="0">
+      <failure message="PrismaClientInitializationError: "><![CDATA[PrismaClientInitializationError: 
+Invalid `prisma.user.deleteMany()` invocation:
+
+
+Authentication failed against database server, the provided database credentials for `username` are not valid.
+
+Please make sure to provide valid database credentials for the database server at the configured address.
+    at ei.handleRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:242:13)
+    at ei.handleAndLogRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at a (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at Object.<anonymous> (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security.test.ts:13:5)]]></failure>
+    </testCase>
+    <testCase name="Security Integration Tests Field-Level Encryption should generate secure API keys" duration="0">
+      <failure message="PrismaClientInitializationError: "><![CDATA[PrismaClientInitializationError: 
+Invalid `prisma.user.deleteMany()` invocation:
+
+
+Authentication failed against database server, the provided database credentials for `username` are not valid.
+
+Please make sure to provide valid database credentials for the database server at the configured address.
+    at ei.handleRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:242:13)
+    at ei.handleAndLogRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at a (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at Object.<anonymous> (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security.test.ts:13:5)]]></failure>
+    </testCase>
+    <testCase name="Security Integration Tests Password Security should hash passwords securely" duration="0">
+      <failure message="PrismaClientInitializationError: "><![CDATA[PrismaClientInitializationError: 
+Invalid `prisma.user.deleteMany()` invocation:
+
+
+Authentication failed against database server, the provided database credentials for `username` are not valid.
+
+Please make sure to provide valid database credentials for the database server at the configured address.
+    at ei.handleRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:242:13)
+    at ei.handleAndLogRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at a (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at Object.<anonymous> (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security.test.ts:13:5)]]></failure>
+    </testCase>
+    <testCase name="Security Integration Tests Password Security should verify password hashes correctly" duration="1">
+      <failure message="PrismaClientInitializationError: "><![CDATA[PrismaClientInitializationError: 
+Invalid `prisma.user.deleteMany()` invocation:
+
+
+Authentication failed against database server, the provided database credentials for `username` are not valid.
+
+Please make sure to provide valid database credentials for the database server at the configured address.
+    at ei.handleRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:242:13)
+    at ei.handleAndLogRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at a (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at Object.<anonymous> (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security.test.ts:13:5)]]></failure>
+    </testCase>
+    <testCase name="Security Integration Tests Password Security should use different salts for same password" duration="0">
+      <failure message="PrismaClientInitializationError: "><![CDATA[PrismaClientInitializationError: 
+Invalid `prisma.user.deleteMany()` invocation:
+
+
+Authentication failed against database server, the provided database credentials for `username` are not valid.
+
+Please make sure to provide valid database credentials for the database server at the configured address.
+    at ei.handleRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:242:13)
+    at ei.handleAndLogRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at a (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at Object.<anonymous> (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security.test.ts:13:5)]]></failure>
+    </testCase>
+    <testCase name="Security Integration Tests Session Security should generate secure session IDs" duration="0">
+      <failure message="PrismaClientInitializationError: "><![CDATA[PrismaClientInitializationError: 
+Invalid `prisma.user.deleteMany()` invocation:
+
+
+Authentication failed against database server, the provided database credentials for `username` are not valid.
+
+Please make sure to provide valid database credentials for the database server at the configured address.
+    at ei.handleRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:242:13)
+    at ei.handleAndLogRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at a (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at Object.<anonymous> (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security.test.ts:13:5)]]></failure>
+    </testCase>
+    <testCase name="Security Integration Tests Error Handling should handle encryption errors gracefully" duration="0">
+      <failure message="PrismaClientInitializationError: "><![CDATA[PrismaClientInitializationError: 
+Invalid `prisma.user.deleteMany()` invocation:
+
+
+Authentication failed against database server, the provided database credentials for `username` are not valid.
+
+Please make sure to provide valid database credentials for the database server at the configured address.
+    at ei.handleRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:242:13)
+    at ei.handleAndLogRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at a (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at Object.<anonymous> (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security.test.ts:13:5)]]></failure>
+    </testCase>
+    <testCase name="Security Integration Tests Error Handling should handle decryption errors gracefully" duration="0">
+      <failure message="PrismaClientInitializationError: "><![CDATA[PrismaClientInitializationError: 
+Invalid `prisma.user.deleteMany()` invocation:
+
+
+Authentication failed against database server, the provided database credentials for `username` are not valid.
+
+Please make sure to provide valid database credentials for the database server at the configured address.
+    at ei.handleRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:242:13)
+    at ei.handleAndLogRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at a (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at Object.<anonymous> (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security.test.ts:13:5)]]></failure>
+    </testCase>
+    <testCase name="Security Integration Tests Error Handling should handle MFA errors gracefully" duration="0">
+      <failure message="PrismaClientInitializationError: "><![CDATA[PrismaClientInitializationError: 
+Invalid `prisma.user.deleteMany()` invocation:
+
+
+Authentication failed against database server, the provided database credentials for `username` are not valid.
+
+Please make sure to provide valid database credentials for the database server at the configured address.
+    at ei.handleRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:242:13)
+    at ei.handleAndLogRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at a (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at Object.<anonymous> (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security.test.ts:13:5)]]></failure>
+    </testCase>
+    <testCase name="Security Integration Tests Error Handling should handle JWT errors gracefully" duration="0">
+      <failure message="PrismaClientInitializationError: "><![CDATA[PrismaClientInitializationError: 
+Invalid `prisma.user.deleteMany()` invocation:
+
+
+Authentication failed against database server, the provided database credentials for `username` are not valid.
+
+Please make sure to provide valid database credentials for the database server at the configured address.
+    at ei.handleRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:242:13)
+    at ei.handleAndLogRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at a (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at Object.<anonymous> (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security.test.ts:13:5)]]></failure>
+    </testCase>
+    <testCase name="Security Integration Tests Rate Limiting should enforce rate limits on API keys" duration="0">
+      <failure message="PrismaClientInitializationError: "><![CDATA[PrismaClientInitializationError: 
+Invalid `prisma.user.deleteMany()` invocation:
+
+
+Authentication failed against database server, the provided database credentials for `username` are not valid.
+
+Please make sure to provide valid database credentials for the database server at the configured address.
+    at ei.handleRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:242:13)
+    at ei.handleAndLogRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at a (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at Object.<anonymous> (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security.test.ts:13:5)]]></failure>
+    </testCase>
+    <testCase name="Security Integration Tests Data Validation should validate input data securely" duration="0">
+      <failure message="PrismaClientInitializationError: "><![CDATA[PrismaClientInitializationError: 
+Invalid `prisma.user.deleteMany()` invocation:
+
+
+Authentication failed against database server, the provided database credentials for `username` are not valid.
+
+Please make sure to provide valid database credentials for the database server at the configured address.
+    at ei.handleRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:242:13)
+    at ei.handleAndLogRequestError (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at a (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at Object.<anonymous> (C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\integration\security.test.ts:13:5)]]></failure>
+    </testCase>
+  </file>
+  <file path="C:\Users\yanp0\OneDrive\Documentos\proyectos\beauty-crafter\__tests__\security_privacy_reliability.test.ts">
+  </file>
+</testExecutions>

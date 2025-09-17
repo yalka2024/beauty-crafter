@@ -1,0 +1,14 @@
+openapi: 3.0.0
+info:
+  title: Beauty Crafter API
+  version: 1.0.0
+  description: OpenAPI spec for Beauty Crafter
+servers:
+  - url: https://beauty-crafter.com/api
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: OK

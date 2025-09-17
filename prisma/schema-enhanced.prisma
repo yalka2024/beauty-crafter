@@ -1,0 +1,1143 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User roles and authentication
+enum UserRole {
+  CLIENT
+  PROVIDER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  PENDING
+  SUSPENDED
+  BANNED
+}
+
+enum ProviderType {
+  BARBER
+  NAIL_TECHNICIAN
+  MASSAGE_THERAPIST
+  COSMETIC_DERMATOLOGIST
+  ESTHETICIAN
+  HAIR_STYLIST
+}
+
+enum ServiceLocation {
+  HOME
+  SALON
+  BOTH
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum LicenseStatus {
+  ACTIVE
+  EXPIRING_SOON
+  EXPIRED
+  PENDING_VERIFICATION
+  SUSPENDED
+}
+
+enum ComplianceType {
+  LICENSE_VERIFICATION
+  BACKGROUND_CHECK
+  INSURANCE_VERIFICATION
+  CONTINUING_EDUCATION
+  SAFETY_CERTIFICATION
+}
+
+// Main user table
+model User {
+  id            String      @id @default(cuid())
+  email         String      @unique
+  emailVerified DateTime?
+  password      String?
+  name          String
+  phone         String?
+  avatar        String?
+  role          UserRole    @default(CLIENT)
+  status        UserStatus  @default(ACTIVE)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // Profile information
+  dateOfBirth   DateTime?
+  gender        String?
+  address       Address?
+  
+  // MFA (Multi-Factor Authentication)
+  mfaSecret     String?
+  mfaEnabled    Boolean @default(false)
+  mfaBackupCodes String[]
+  
+  // Relationships
+  client        Client?
+  provider      Provider?
+  admin         Admin?
+  
+  // Authentication
+  accounts      Account[]
+  sessions      Session[]
+  refreshTokens RefreshToken[]
+  
+  // Notifications
+  notifications Notification[]
+  
+  // Reviews
+  sentReviews       Review[] @relation("ReviewSender")
+  receivedReviews   Review[] @relation("ReviewReceiver")
+  
+  // Messages
+  sentMessages     Message[] @relation("MessageSender")
+  receivedMessages Message[] @relation("MessageReceiver")
+  
+  // Favorites
+  clientFavorites    Favorite[] @relation("FavoriteClient")
+  providerFavorites  Favorite[] @relation("FavoriteProvider")
+  
+  // New enhanced features
+  preferences        ClientPreference?
+  aiRecommendations AIRecommendation[]
+  virtualConsultations VirtualConsultation[]
+  arSessions        ARSession[]
+  loyaltyTiers      UserLoyaltyTier[]
+  loyaltyTransactions LoyaltyTransaction[]
+  subscriptions     UserSubscription[]
+  socialPosts       SocialPost[]
+  influencer        Influencer?
+  productRecommendations ProductRecommendation[]
+  orders            Order[]
+  disputes          Dispute[]
+  fraudAlerts       FraudAlert[]
+  deviceFingerprints DeviceFingerprint[]
+  
+  @@map("users")
+}
+
+// OAuth accounts
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+// User sessions
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+// Verification tokens
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// Refresh tokens for JWT rotation
+model RefreshToken {
+  id          String   @id @default(cuid())
+  token       String   @unique
+  userId      String
+  jti         String   @unique // JWT ID for token identification
+  expiresAt   DateTime
+  isRevoked   Boolean  @default(false)
+  revokedAt   DateTime?
+  userAgent   String?
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+  lastUsedAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+}
+
+// Address model
+model Address {
+  id          String @id @default(cuid())
+  userId      String @unique
+  street      String
+  city        String
+  state       String
+  zipCode     String
+  country     String @default("US")
+  latitude    Float?
+  longitude   Float?
+  isDefault   Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("addresses")
+}
+
+// Client-specific information
+model Client {
+  id                    String @id @default(cuid())
+  userId                String @unique
+  preferences           Json?
+  emergencyContact      String?
+  medicalConditions     String[]
+  allergies             String[]
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Relationships
+  bookings    Booking[]
+  favorites   Favorite[]
+  reviews     Review[]
+  payments    Payment[]
+  virtualConsultations VirtualConsultation[]
+  disputes    Dispute[]
+
+  @@map("clients")
+}
+
+// Provider-specific information
+model Provider {
+  id                    String @id @default(cuid())
+  userId                String @unique
+  providerType          ProviderType[]
+  businessName          String?
+  businessLicense       String?
+  yearsOfExperience    Int?
+  specialties           String[]
+  bio                   String?
+  hourlyRate            Decimal @db.Decimal(10, 2)
+  travelRadius          Int? // in miles
+  acceptsHomeService    Boolean @default(true)
+  acceptsSalonService   Boolean @default(true)
+  isAvailable           Boolean @default(true)
+  rating                Decimal @db.Decimal(3, 2) @default(0)
+  totalReviews          Int @default(0)
+  completedServices     Int @default(0)
+  joinDate              DateTime @default(now())
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Relationships
+  services       Service[]
+  bookings       Booking[]
+  availability   Availability[]
+  licenses       License[]
+  insurance      Insurance[]
+  backgroundChecks BackgroundCheck[]
+  reviews        Review[]
+  payments       Payment[]
+  portfolio      Portfolio[]
+  certifications Certification[]
+  favorites      Favorite[]
+  
+  // New enhanced features
+  aiRecommendations AIRecommendation[]
+  virtualConsultations VirtualConsultation[]
+  arSessions        ARSession[]
+  businessLocations BusinessLocation[]
+  socialPosts       SocialPost[]
+  influencerPartnerships InfluencerPartnership[]
+  disputes          Dispute[]
+
+  @@map("providers")
+}
+
+// Admin information
+model Admin {
+  id          String @id @default(cuid())
+  userId      String @unique
+  permissions String[]
+  department  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("admins")
+}
+
+// Services offered by providers
+model Service {
+  id              String @id @default(cuid())
+  providerId      String
+  name            String
+  description     String
+  category        String
+  subcategory     String?
+  duration        Int // in minutes
+  price           Decimal @db.Decimal(10, 2)
+  location        ServiceLocation @default(BOTH)
+  isActive        Boolean @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  
+  // Relationships
+  bookings    Booking[]
+  addOns      ServiceAddOn[]
+  aiRecommendations AIRecommendation[]
+  virtualConsultations VirtualConsultation[]
+  arSessions  ARSession[]
+  productRecommendations ProductRecommendation[]
+
+  @@map("services")
+}
+
+// Service add-ons
+model ServiceAddOn {
+  id          String @id @default(cuid())
+  serviceId   String
+  name        String
+  description String?
+  price       Decimal @db.Decimal(10, 2)
+  duration    Int // additional minutes
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  service Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  
+  // Relations
+  bookingAddOns BookingAddOn[]
+
+  @@map("service_add_ons")
+}
+
+// Provider availability
+model Availability {
+  id          String @id @default(cuid())
+  providerId  String
+  dayOfWeek   Int // 0-6 (Sunday-Saturday)
+  startTime   String // HH:MM format
+  endTime     String // HH:MM format
+  isAvailable Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@unique([providerId, dayOfWeek, startTime])
+  @@map("availability")
+}
+
+// Bookings
+model Booking {
+  id              String @id @default(cuid())
+  clientId        String
+  providerId      String
+  serviceId       String
+  scheduledDate   DateTime
+  startTime       String
+  endTime         String
+  duration        Int // in minutes
+  location        ServiceLocation
+  address         String? // for home service
+  notes           String?
+  status          BookingStatus @default(PENDING)
+  totalAmount     Decimal @db.Decimal(10, 2)
+  commission      Decimal @db.Decimal(10, 2)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  client   Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  service  Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  
+  // Relationships
+  payments    Payment[]
+  reviews     Review[]
+  addOns      BookingAddOn[]
+  socialPosts SocialPost[]
+  productRecommendations ProductRecommendation[]
+  disputes    Dispute[]
+  businessLocation BusinessLocation? @relation(fields: [businessLocationId], references: [id])
+  businessLocationId String?
+
+  @@map("bookings")
+}
+
+// Booking add-ons
+model BookingAddOn {
+  id          String @id @default(cuid())
+  bookingId   String
+  addOnId     String
+  price       Decimal @db.Decimal(10, 2)
+  createdAt   DateTime @default(now())
+
+  booking Booking @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  addOn   ServiceAddOn @relation(fields: [addOnId], references: [id], onDelete: Cascade)
+
+  @@map("booking_add_ons")
+}
+
+// Payments
+model Payment {
+  id              String @id @default(cuid())
+  bookingId       String
+  clientId        String
+  providerId      String
+  amount          Decimal @db.Decimal(10, 2)
+  currency        String @default("USD")
+  status          PaymentStatus @default(PENDING)
+  stripePaymentId String?
+  stripeRefundId  String?
+  commission      Decimal @db.Decimal(10, 2)
+  providerAmount  Decimal @db.Decimal(10, 2)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  booking  Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  client   Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+// Reviews and ratings
+model Review {
+  id          String @id @default(cuid())
+  bookingId   String
+  clientId    String
+  providerId  String
+  rating      Int // 1-5
+  comment     String?
+  isPublic    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  booking  Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  client   Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  
+  // Relation fields for User model
+  clientUser   User @relation("ReviewSender", fields: [clientId], references: [id], onDelete: Cascade, map: "reviews_client_user_fkey")
+  providerUser User @relation("ReviewReceiver", fields: [providerId], references: [id], onDelete: Cascade, map: "reviews_provider_user_fkey")
+
+  @@unique([bookingId])
+  @@map("reviews")
+}
+
+// License verification
+model License {
+  id              String @id @default(cuid())
+  providerId      String
+  licenseNumber   String
+  state           String
+  type            String
+  issueDate       DateTime
+  expiryDate      DateTime
+  status          LicenseStatus @default(PENDING_VERIFICATION)
+  verificationDate DateTime?
+  verifiedBy      String?
+  documentUrl     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@map("licenses")
+}
+
+// Insurance verification
+model Insurance {
+  id              String @id @default(cuid())
+  providerId      String
+  policyNumber    String
+  insuranceProvider String
+  coverageAmount  Decimal @db.Decimal(12, 2)
+  startDate       DateTime
+  endDate         DateTime
+  isActive        Boolean @default(true)
+  documentUrl     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@map("insurance")
+}
+
+// Background checks
+model BackgroundCheck {
+  id              String @id @default(cuid())
+  providerId      String
+  checkType       String
+  status          String
+  completedDate   DateTime?
+  expiresDate     DateTime?
+  documentUrl     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@map("background_checks")
+}
+
+// Certifications
+model Certification {
+  id              String @id @default(cuid())
+  providerId      String
+  name            String
+  issuingBody     String
+  issueDate       DateTime
+  expiryDate      DateTime?
+  documentUrl     String?
+  isActive        Boolean @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@map("certifications")
+}
+
+// Portfolio items
+model Portfolio {
+  id          String @id @default(cuid())
+  providerId  String
+  title       String
+  description String?
+  imageUrl    String
+  category    String
+  isPublic    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@map("portfolio")
+}
+
+// Favorites
+model Favorite {
+  id          String @id @default(cuid())
+  clientId    String
+  providerId  String
+  createdAt   DateTime @default(now())
+
+  client   Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  
+  // Relation fields for User model
+  clientUser   User @relation("FavoriteClient", fields: [clientId], references: [id], onDelete: Cascade, map: "favorites_client_user_fkey")
+  providerUser User @relation("FavoriteProvider", fields: [providerId], references: [id], onDelete: Cascade, map: "favorites_provider_user_fkey")
+
+  @@unique([clientId, providerId])
+  @@map("favorites")
+}
+
+// Notifications
+model Notification {
+  id          String @id @default(cuid())
+  userId      String
+  title       String
+  message     String
+  type        String
+  isRead      Boolean @default(false)
+  data        Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+// Messages between users
+model Message {
+  id          String @id @default(cuid())
+  senderId    String
+  receiverId  String
+  content     String
+  isRead      Boolean @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sender   User @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+// Compliance alerts
+model ComplianceAlert {
+  id              String @id @default(cuid())
+  providerId      String
+  type            ComplianceType
+  severity        String
+  message         String
+  isResolved      Boolean @default(false)
+  resolvedBy      String?
+  resolvedAt      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("compliance_alerts")
+}
+
+// Analytics and metrics
+model Analytics {
+  id          String @id @default(cuid())
+  date        DateTime
+  metric      String
+  value       Decimal @db.Decimal(15, 2)
+  category    String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@map("analytics")
+}
+
+// API Key Management
+model APIKey {
+  id                String   @id @default(cuid())
+  key               String   @unique
+  hashedSecret      String
+  name              String
+  description       String?
+  permissions       String[]
+  rateLimitRequests Int      @default(1000)
+  rateLimitWindow   Int      @default(3600) // in seconds
+  allowedIPs        String[]
+  allowedOrigins    String[]
+  expiresAt         DateTime?
+  isActive          Boolean  @default(true)
+  lastUsedAt        DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Usage tracking
+  usage APIKeyUsage[]
+
+  @@map("api_keys")
+}
+
+model APIKeyUsage {
+  id           String   @id @default(cuid())
+  keyId        String
+  endpoint     String
+  method       String
+  ipAddress    String
+  userAgent    String
+  timestamp    DateTime @default(now())
+  responseTime Int      // in milliseconds
+  statusCode   Int
+  success      Boolean
+
+  // Relationships
+  apiKey APIKey @relation(fields: [keyId], references: [id], onDelete: Cascade)
+
+  @@map("api_key_usage")
+}
+
+// AI Personalization Engine
+model AIRecommendation {
+  id              String   @id @default(cuid())
+  userId          String
+  providerId      String?
+  serviceId       String?
+  recommendationType String // "service", "provider", "product"
+  confidence      Float    // 0.0 to 1.0
+  reason          String?
+  metadata        Json?
+  isViewed        Boolean  @default(false)
+  isActedUpon     Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  expiresAt       DateTime?
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider Provider? @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  service  Service?  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@map("ai_recommendations")
+}
+
+// Client preferences for AI
+model ClientPreference {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  skinType        String?
+  hairType        String?
+  hairColor       String?
+  eyeColor        String?
+  skinTone        String?
+  allergies       String[]
+  sensitivities   String[]
+  preferredStyles String[]
+  budgetRange     Json?    // {min: number, max: number}
+  locationRadius  Int?     // in miles
+  timePreferences Json?    // {morning: boolean, afternoon: boolean, evening: boolean}
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("client_preferences")
+}
+
+// Virtual Consultations
+model VirtualConsultation {
+  id              String   @id @default(cuid())
+  clientId        String
+  providerId      String
+  serviceId       String?
+  scheduledDate   DateTime
+  duration        Int      // in minutes
+  status          String   // "scheduled", "in_progress", "completed", "cancelled"
+  twilioRoomId    String?
+  meetingUrl      String?
+  notes           String?
+  recordingUrl    String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  client   Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  service  Service? @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@map("virtual_consultations")
+}
+
+// AR Try-On Sessions
+model ARSession {
+  id              String   @id @default(cuid())
+  userId          String
+  providerId      String?
+  serviceId       String?
+  sessionType     String   // "makeup", "hair", "nails"
+  arData          Json?    // AR filter data
+  beforeImage     String?
+  afterImage      String?
+  isPublic        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider Provider? @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  service  Service?  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@map("ar_sessions")
+}
+
+// Loyalty & Subscription System
+model LoyaltyTier {
+  id                String   @id @default(cuid())
+  name              String
+  description       String?
+  minPoints         Int
+  maxPoints         Int?
+  benefits          Json?    // Array of benefits
+  discountPercent   Float?   // Percentage discount
+  priorityBooking   Boolean  @default(false)
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relationships
+  userTiers UserLoyaltyTier[]
+
+  @@map("loyalty_tiers")
+}
+
+model UserLoyaltyTier {
+  id            String      @id @default(cuid())
+  userId        String
+  tierId        String
+  currentPoints Int         @default(0)
+  totalEarned   Int         @default(0)
+  totalRedeemed Int         @default(0)
+  joinedAt      DateTime    @default(now())
+  lastEarnedAt  DateTime?
+  lastRedeemedAt DateTime?
+
+  user User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tier LoyaltyTier @relation(fields: [tierId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, tierId])
+  @@map("user_loyalty_tiers")
+}
+
+model LoyaltyTransaction {
+  id              String   @id @default(cuid())
+  userId          String
+  points          Int      // Positive for earning, negative for redeeming
+  transactionType String   // "earn", "redeem", "expire", "adjustment"
+  source          String?  // "booking", "review", "referral", "manual"
+  sourceId        String?  // ID of the source (booking, review, etc.)
+  description     String?
+  expiresAt       DateTime?
+  createdAt       DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("loyalty_transactions")
+}
+
+// Subscription Tiers
+model SubscriptionTier {
+  id                String   @id @default(cuid())
+  name              String
+  description       String?
+  price             Decimal  @db.Decimal(10, 2)
+  currency          String   @default("USD")
+  billingCycle      String   // "monthly", "yearly"
+  features          Json?    // Array of features
+  maxBookings       Int?
+  prioritySupport   Boolean  @default(false)
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  // Relationships
+  subscriptions UserSubscription[]
+
+  @@map("subscription_tiers")
+}
+
+model UserSubscription {
+  id                String           @id @default(cuid())
+  userId            String
+  tierId            String
+  status            String           // "active", "cancelled", "expired", "paused"
+  stripeSubscriptionId String?
+  currentPeriodStart DateTime
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean         @default(false)
+  cancelledAt        DateTime?
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+
+  user User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tier SubscriptionTier  @relation(fields: [tierId], references: [id], onDelete: Cascade)
+
+  @@map("user_subscriptions")
+}
+
+// Multi-Location & Team Management
+model BusinessLocation {
+  id              String   @id @default(cuid())
+  providerId      String
+  name            String
+  address         String
+  city            String
+  state           String
+  zipCode         String
+  country         String
+  latitude        Float?
+  longitude       Float?
+  phone           String?
+  email           String?
+  isPrimary       Boolean  @default(false)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  // Relationships
+  staff BusinessStaff[]
+  bookings Booking[]
+
+  @@map("business_locations")
+}
+
+model BusinessStaff {
+  id              String   @id @default(cuid())
+  locationId      String
+  userId          String
+  role            String   // "manager", "stylist", "assistant", "receptionist"
+  permissions     String[]
+  isActive        Boolean  @default(true)
+  joinedAt        DateTime @default(now())
+  leftAt          DateTime?
+
+  location BusinessLocation @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  user     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([locationId, userId])
+  @@map("business_staff")
+}
+
+// Social Integration & Influencer Marketplace
+model SocialPost {
+  id              String   @id @default(cuid())
+  userId          String
+  providerId      String?
+  bookingId       String?
+  platform        String   // "instagram", "tiktok", "facebook", "twitter"
+  content         String
+  mediaUrls       String[]
+  hashtags        String[]
+  isPublished     Boolean  @default(false)
+  publishedAt     DateTime?
+  engagement      Json?    // Likes, comments, shares
+  createdAt       DateTime @default(now())
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider Provider? @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  booking  Booking?  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@map("social_posts")
+}
+
+model Influencer {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  platform        String
+  handle          String
+  followers       Int
+  engagementRate  Float
+  categories      String[]
+  isVerified      Boolean  @default(false)
+  isActive        Boolean  @default(true)
+  commissionRate  Float?   // Percentage for partnerships
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Relationships
+  partnerships InfluencerPartnership[]
+
+  @@map("influencers")
+}
+
+model InfluencerPartnership {
+  id              String   @id @default(cuid())
+  influencerId    String
+  providerId      String
+  status          String   // "pending", "active", "completed", "cancelled"
+  startDate       DateTime
+  endDate         DateTime?
+  terms           Json?    // Partnership terms
+  commission      Decimal  @db.Decimal(5, 2)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  influencer Influencer @relation(fields: [influencerId], references: [id], onDelete: Cascade)
+  provider   Provider   @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@map("influencer_partnerships")
+}
+
+// E-Commerce Module
+model Product {
+  id              String   @id @default(cuid())
+  name            String
+  description     String
+  category        String
+  subcategory     String?
+  price           Decimal  @db.Decimal(10, 2)
+  currency        String   @default("USD")
+  sku             String   @unique
+  stock           Int      @default(0)
+  images          String[]
+  specifications  Json?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relationships
+  recommendations ProductRecommendation[]
+  orderItems      OrderItem[]
+
+  @@map("products")
+}
+
+model ProductRecommendation {
+  id              String   @id @default(cuid())
+  userId          String
+  productId       String
+  serviceId       String?
+  bookingId       String?
+  reason          String?
+  confidence      Float
+  isViewed        Boolean  @default(false)
+  isPurchased     Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  service Service? @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  booking Booking? @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@map("product_recommendations")
+}
+
+model Order {
+  id              String   @id @default(cuid())
+  userId          String
+  totalAmount     Decimal  @db.Decimal(10, 2)
+  currency        String   @default("USD")
+  status          String   // "pending", "processing", "shipped", "delivered", "cancelled"
+  shippingAddress Json
+  billingAddress  Json
+  stripePaymentId String?
+  trackingNumber  String?
+  shippedAt       DateTime?
+  deliveredAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id              String   @id @default(cuid())
+  orderId         String
+  productId       String
+  quantity        Int
+  price           Decimal  @db.Decimal(10, 2)
+  createdAt       DateTime @default(now())
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("order_items")
+}
+
+// Internationalization
+model Language {
+  id              String   @id @default(cuid())
+  code            String   @unique // "en", "es", "fr", etc.
+  name            String
+  nativeName      String
+  isActive        Boolean  @default(true)
+  isDefault       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  // Relationships
+  translations Translation[]
+
+  @@map("languages")
+}
+
+model Translation {
+  id              String   @id @default(cuid())
+  languageId      String
+  key             String
+  value           String
+  context         String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  language Language @relation(fields: [languageId], references: [id], onDelete: Cascade)
+
+  @@unique([languageId, key])
+  @@map("translations")
+}
+
+// Enhanced Security - Dispute Resolution
+model Dispute {
+  id              String   @id @default(cuid())
+  bookingId       String
+  clientId        String
+  providerId      String
+  type            String   // "payment", "service", "cancellation", "no_show"
+  reason          String
+  description     String
+  status          String   // "open", "in_review", "resolved", "closed"
+  resolution      String?
+  evidence        Json?    // Array of evidence files
+  adminId         String?
+  resolvedAt      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  booking  Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  client   Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
+
+  @@map("disputes")
+}
+
+// Enhanced Security - Fraud Detection
+model FraudAlert {
+  id              String   @id @default(cuid())
+  userId          String?
+  type            String   // "suspicious_booking", "fake_review", "account_takeover", "payment_fraud"
+  severity        String   // "low", "medium", "high", "critical"
+  description     String
+  evidence        Json?
+  isResolved      Boolean  @default(false)
+  resolvedBy      String?
+  resolvedAt      DateTime?
+  createdAt       DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("fraud_alerts")
+}
+
+// Enhanced Security - Device Tracking
+model DeviceFingerprint {
+  id              String   @id @default(cuid())
+  userId          String
+  fingerprint     String   @unique
+  userAgent       String
+  ipAddress       String
+  location        Json?
+  isTrusted       Boolean  @default(false)
+  lastSeenAt      DateTime @default(now())
+  createdAt       DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("device_fingerprints")
+}

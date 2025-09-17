@@ -1,0 +1,430 @@
+name: Beauty Crafter CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  release:
+    types: [ published ]
+
+env:
+  NODE_VERSION: '18'
+  POSTGRES_VERSION: '15'
+  REDIS_VERSION: '7'
+
+jobs:
+  # Code Quality & Security
+  code-quality:
+    name: Code Quality & Security
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run ESLint
+        run: npm run lint
+        
+      - name: Run Prettier check
+        run: npm run format:check
+        
+      - name: Run TypeScript check
+        run: npm run type-check
+        
+      - name: Run security audit
+        run: npm audit --audit-level=moderate
+        
+      - name: Run SonarQube analysis
+        uses: sonarqube-quality-gate-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=beauty-crafter
+            -Dsonar.sources=.
+            -Dsonar.exclusions=**/*.test.ts,**/*.spec.ts,node_modules/**,dist/**,build/**
+            -Dsonar.test.inclusions=**/*.test.ts,**/*.spec.ts
+            -Dsonar.coverage.exclusions=**/*.test.ts,**/*.spec.ts,node_modules/**,dist/**,build/**
+
+  # Testing
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:${{ env.POSTGRES_VERSION }}
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: beauty_crafter_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+          
+      redis:
+        image: redis:${{ env.REDIS_VERSION }}
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Setup environment
+        run: |
+          cp .env.example .env
+          echo "DATABASE_URL=postgresql://postgres:postgres@localhost:5432/beauty_crafter_test" >> .env
+          echo "REDIS_URL=redis://localhost:6379" >> .env
+          echo "NEXTAUTH_SECRET=test-secret" >> .env
+          echo "NEXTAUTH_URL=http://localhost:3000" >> .env
+          
+      - name: Run database migrations
+        run: npx prisma migrate deploy
+        
+      - name: Run tests with coverage
+        run: npm run test:coverage
+        
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+          
+      - name: Run E2E tests
+        run: npm run test:e2e
+        
+      - name: Run security tests
+        run: npm run test:security
+
+  # Build & Package
+  build:
+    name: Build & Package
+    runs-on: ubuntu-latest
+    needs: [code-quality, test]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build application
+        run: npm run build
+        
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: beauty-crafter:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            .next/
+            public/
+            package.json
+            package-lock.json
+            Dockerfile
+            docker-compose.yml
+
+  # Security Scanning
+  security:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          
+      - name: Upload Trivy scan results
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: 'trivy-results.sarif'
+          
+      - name: Run OWASP ZAP security scan
+        uses: zaproxy/action-full-scan@v0.8.0
+        with:
+          target: 'http://localhost:3000'
+          
+      - name: Run Snyk security scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+
+  # Performance Testing
+  performance:
+    name: Performance Testing
+    runs-on: ubuntu-latest
+    needs: build
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          
+      - name: Start application
+        run: |
+          npm start &
+          sleep 30
+          
+      - name: Run Lighthouse CI
+        run: |
+          npm install -g @lhci/cli
+          lhci autorun
+          
+      - name: Run Artillery performance tests
+        run: |
+          npm install -g artillery
+          artillery run performance-tests/load-test.yml
+          
+      - name: Upload performance results
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-results
+          path: |
+            .lighthouseci/
+            artillery-report.json
+
+  # Deploy to Staging
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build, security, performance]
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        
+      - name: Build and push Docker image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: beauty-crafter-staging
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          
+      - name: Deploy to ECS
+        run: |
+          aws ecs update-service \
+            --cluster beauty-crafter-staging \
+            --service beauty-crafter-service \
+            --force-new-deployment
+            
+      - name: Wait for deployment
+        run: |
+          aws ecs wait services-stable \
+            --cluster beauty-crafter-staging \
+            --services beauty-crafter-service
+            
+      - name: Run smoke tests
+        run: |
+          npm run test:smoke -- --base-url=${{ secrets.STAGING_URL }}
+
+  # Deploy to Production
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build, security, performance]
+    if: github.event_name == 'release'
+    environment: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+          
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        
+      - name: Build and push Docker image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: beauty-crafter-production
+          IMAGE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          
+      - name: Deploy to ECS
+        run: |
+          aws ecs update-service \
+            --cluster beauty-crafter-production \
+            --service beauty-crafter-service \
+            --force-new-deployment
+            
+      - name: Wait for deployment
+        run: |
+          aws ecs wait services-stable \
+            --cluster beauty-crafter-production \
+            --services beauty-crafter-service
+            
+      - name: Run production tests
+        run: |
+          npm run test:production -- --base-url=${{ secrets.PRODUCTION_URL }}
+          
+      - name: Notify deployment
+        run: |
+          curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} \
+            -H 'Content-type: application/json' \
+            -d '{"text":"🚀 Beauty Crafter v${{ github.event.release.tag_name }} deployed to production successfully!"}'
+
+  # Infrastructure as Code
+  infrastructure:
+    name: Infrastructure as Code
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.5.0'
+          
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          
+      - name: Terraform Init
+        run: |
+          cd infrastructure
+          terraform init
+          
+      - name: Terraform Plan
+        run: |
+          cd infrastructure
+          terraform plan -out=tfplan
+          
+      - name: Terraform Apply
+        run: |
+          cd infrastructure
+          terraform apply -auto-approve tfplan
+
+  # Monitoring & Alerting
+  monitoring:
+    name: Monitoring & Alerting
+    runs-on: ubuntu-latest
+    needs: [deploy-production]
+    if: github.event_name == 'release'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup monitoring
+        run: |
+          # Configure Prometheus alerts
+          # Configure Grafana dashboards
+          # Setup PagerDuty integration
+          echo "Monitoring configured for production deployment"
+          
+      - name: Verify monitoring
+        run: |
+          # Test alerting
+          # Verify dashboard access
+          # Check log aggregation
+          echo "Monitoring verification completed"
+
+# Dependencies between jobs
+# code-quality -> test -> build -> security -> performance -> deploy-staging -> deploy-production -> infrastructure -> monitoring

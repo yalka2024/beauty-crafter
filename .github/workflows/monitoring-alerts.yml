@@ -1,0 +1,17 @@
+name: Monitoring & Alerts
+on:
+  schedule:
+    - cron: '*/15 * * * *' # every 15 minutes
+jobs:
+  check-health:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Health Check
+        run: |
+          node scripts/health-check.js
+      - name: Alert on Failure
+        if: failure()
+        run: |
+          echo "Health check failed! Triggering alert..."
+          # Integrate with Slack, PagerDuty, or email here

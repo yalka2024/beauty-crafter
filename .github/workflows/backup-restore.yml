@@ -1,0 +1,20 @@
+name: Backup and Restore Test
+on:
+  schedule:
+    - cron: '0 3 * * 0' # Weekly at 3am UTC
+  workflow_dispatch:
+jobs:
+  backup-restore:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Backup Postgres DB (example)
+        run: |
+          docker exec postgres pg_dump -U beauty_crafter > backup.sql
+      - name: Restore Postgres DB (example)
+        run: |
+          docker exec -i postgres psql -U beauty_crafter < backup.sql
+      - name: Verify restore
+        run: |
+          echo "Add DB verification logic here"
