@@ -202,7 +202,7 @@
     "standard-version": "^9.5.0",
     "ts-jest": "^29.1.2",
     "ts-node": "^10.9.2",
-    "tsx": "^4.7.0",
+    "tsx": "^4.20.5",
     "typescript": "^5.4.5",
     "wrap-ansi": "^9.0.0",
     "yargs": "^18.0.0"
