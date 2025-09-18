@@ -1,0 +1,25 @@
+name: Auto Deploy Retrained Model
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - master
+jobs:
+  deploy-model:
+    if: |
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.title == 'Auto Model Retrain'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Deploy new model
+        run: |
+          echo "Deploying retrained model..."
+          # Insert your deployment command here, e.g. copy model.pkl to production or reload service
+      - name: Notify deployment
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_MESSAGE: 'Retrained model deployed automatically.'
+          SLACK_COLOR: '#36a64f'

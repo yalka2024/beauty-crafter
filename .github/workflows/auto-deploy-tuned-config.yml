@@ -1,0 +1,25 @@
+name: Auto Deploy Tuned Config
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - master
+jobs:
+  deploy-config:
+    if: |
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.title == 'Auto Config Tuning'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Deploy new config
+        run: |
+          echo "Deploying tuned config..."
+          # Insert your deployment command here, e.g. kubectl apply -f config/app-config.json
+      - name: Notify deployment
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_MESSAGE: 'Tuned config deployed automatically.'
+          SLACK_COLOR: '#36a64f'
