@@ -8,7 +8,7 @@
     "lib"
   ],
   "scripts": {
-    "build": "next build",
+    "build": "prisma generate && next build",
     "dev": "next dev",
     "start": "next start",
     "start:production": "node scripts/start-production.js",
