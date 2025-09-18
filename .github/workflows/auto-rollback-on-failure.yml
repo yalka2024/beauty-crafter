@@ -1,0 +1,25 @@
+name: Auto Rollback on Deployment Failure
+on:
+  workflow_run:
+    workflows: ["CI/CD Pipeline"]
+    types:
+      - completed
+jobs:
+  rollback:
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Rollback deployment
+        run: |
+          echo "Deployment failed. Initiating rollback..."
+          # Add your rollback script or kubectl/helm rollback command here
+          # Example for Kubernetes:
+          # kubectl rollout undo deployment/your-deployment-name --namespace=production
+      - name: Notify on rollback
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_MESSAGE: 'Deployment failed and rollback was triggered.'
+          SLACK_COLOR: '#ff0000'

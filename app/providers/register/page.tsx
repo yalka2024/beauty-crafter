@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Upload, Shield, CheckCircle, AlertCircle, FileText, Camera, Award } from "lucide-react"
 import Link from "next/link"
+import { TermsAcceptance } from "@/components/legal/terms-acceptance"
 
 const US_STATES = [
   "Alabama",
@@ -74,6 +75,7 @@ const SERVICE_TYPES = [
 
 export default function ProviderRegistration() {
   const [currentStep, setCurrentStep] = useState(1)
+  const [legalAccepted, setLegalAccepted] = useState(false)
   const [formData, setFormData] = useState({
     personalInfo: {},
     businessInfo: {},
@@ -633,25 +635,13 @@ export default function ProviderRegistration() {
                   </div>
                 </div>
 
-                <div className="space-y-4">
-                  <Label>Terms and Conditions *</Label>
-                  <div className="flex items-start space-x-3">
-                    <Checkbox id="terms" required />
-                    <Label htmlFor="terms" className="text-sm leading-relaxed">
-                      I agree to the{" "}
-                      <Link href="/terms" className="text-primary hover:underline">
-                        Terms of Service
-                      </Link>
-                      ,{" "}
-                      <Link href="/privacy" className="text-primary hover:underline">
-                        Privacy Policy
-                      </Link>
-                      , and{" "}
-                      <Link href="/provider-agreement" className="text-primary hover:underline">
-                        Provider Agreement
-                      </Link>
-                    </Label>
-                  </div>
+                {/* Legal Agreement Acceptance */}
+                <div className="mt-6">
+                  <TermsAcceptance 
+                    userType="provider"
+                    onAcceptance={setLegalAccepted}
+                    required={true}
+                  />
                 </div>
 
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
@@ -683,7 +673,16 @@ export default function ProviderRegistration() {
             {currentStep < 5 ? (
               <Button onClick={() => setCurrentStep(Math.min(5, currentStep + 1))}>Next Step</Button>
             ) : (
-              <Button className="bg-green-600 hover:bg-green-700">Submit Application</Button>
+              <Button 
+                className={`${
+                  legalAccepted 
+                    ? 'bg-green-600 hover:bg-green-700' 
+                    : 'bg-gray-400 cursor-not-allowed'
+                }`}
+                disabled={!legalAccepted}
+              >
+                {legalAccepted ? 'Submit Application' : 'Please Accept Legal Agreements'}
+              </Button>
             )}
           </div>
         </div>

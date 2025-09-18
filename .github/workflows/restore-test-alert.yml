@@ -1,0 +1,48 @@
+name: Automated Restore Test with Alert
+on:
+  schedule:
+    - cron: '0 4 * * 0' # Every Sunday at 4am UTC
+  workflow_dispatch:
+jobs:
+  restore-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: Install dependencies
+        run: pnpm install
+      - name: Run restore test
+        run: |
+          LATEST_BACKUP=$(ls -t scripts/backup/*.bak | head -n1)
+          if [ -z "$LATEST_BACKUP" ]; then
+            echo "No backup file found!" && exit 1
+          fi
+          node scripts/backup-restore.js restore "$LATEST_BACKUP"
+      - name: Send Slack alert on failure
+        if: failure()
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_MESSAGE: 'Restore test failed! Immediate attention required.'
+          SLACK_COLOR: '#ff0000'
+      - name: Send PagerDuty alert on failure
+        if: failure()
+        run: |
+          curl -X POST 'https://events.pagerduty.com/v2/enqueue' \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "routing_key": "${{ secrets.PAGERDUTY_INTEGRATION_KEY }}",
+              "event_action": "trigger",
+              "payload": {
+                "summary": "Restore test failed!",
+                "source": "github-actions",
+                "severity": "critical"
+              }
+            }'
+      - name: Send Email alert on failure
+        if: failure()
+        run: |
+          echo "Restore test failed!" | mail -s "Restore Test Failure" ${{ secrets.ALERT_TO }}

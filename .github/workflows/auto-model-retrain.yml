@@ -1,0 +1,30 @@
+name: Auto Model Retrain
+on:
+  schedule:
+    - cron: '0 3 * * 1' # Every Monday at 3am UTC
+  workflow_dispatch:
+jobs:
+  model-retrain:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install -r ml/requirements.txt
+      - name: Run model retraining
+        run: python ml/retrain.py
+      - name: Upload new model artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: new-model
+          path: ml/model.pkl
+      - name: Create PR for new model
+        uses: peter-evans/create-pull-request@v5
+        with:
+          commit-message: 'chore: auto-retrain ML model'
+          title: 'Auto Model Retrain'
+          body: 'This PR contains a newly retrained model based on recent data.'

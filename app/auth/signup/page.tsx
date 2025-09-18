@@ -15,6 +15,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { toast } from "sonner"
+import { TermsAcceptance } from "@/components/legal/terms-acceptance"
 
 const signUpSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -23,7 +24,6 @@ const signUpSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string(),
   role: z.enum(["CLIENT", "PROVIDER"]),
-  acceptTerms: z.boolean().refine(val => val === true, "You must accept the terms and conditions"),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -36,6 +36,7 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [legalAccepted, setLegalAccepted] = useState(false)
   const router = useRouter()
 
   const {
@@ -55,6 +56,11 @@ export default function SignUpPage() {
   const selectedRole = watch("role")
 
   const onSubmit = async (data: SignUpForm) => {
+    if (!legalAccepted) {
+      toast.error("Please accept all legal agreements to continue")
+      return
+    }
+
     setIsLoading(true)
     setError(null)
 
@@ -257,32 +263,19 @@ export default function SignUpPage() {
               )}
             </div>
 
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="acceptTerms"
-                {...register("acceptTerms")}
-                className="rounded border-gray-300"
+            {/* Legal Agreement Acceptance */}
+            <div className="mt-6">
+              <TermsAcceptance 
+                userType={selectedRole.toLowerCase() as 'client' | 'provider'}
+                onAcceptance={setLegalAccepted}
+                required={true}
               />
-              <Label htmlFor="acceptTerms" className="text-sm">
-                I agree to the{" "}
-                <Link href="/terms" className="text-primary hover:underline">
-                  Terms of Service
-                </Link>{" "}
-                and{" "}
-                <Link href="/privacy" className="text-primary hover:underline">
-                  Privacy Policy
-                </Link>
-              </Label>
             </div>
-            {errors.acceptTerms && (
-              <p className="text-sm text-red-500">{errors.acceptTerms.message}</p>
-            )}
 
             <Button
               type="submit"
               className="w-full"
-              disabled={isLoading}
+              disabled={isLoading || !legalAccepted}
             >
               {isLoading ? (
                 <>

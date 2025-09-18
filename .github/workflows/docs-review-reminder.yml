@@ -1,0 +1,18 @@
+name: Documentation Review Reminder
+on:
+  schedule:
+    - cron: '0 9 1 * *' # 9am UTC, first day of every month
+  workflow_dispatch:
+jobs:
+  docs-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack reminder
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_MESSAGE: 'Monthly reminder: Please review and update documentation, runbooks, and compliance checklists.'
+          SLACK_COLOR: '#439FE0'
+      - name: Send Email reminder
+        run: |
+          echo "Monthly reminder: Please review and update documentation, runbooks, and compliance checklists." | mail -s "Documentation Review Reminder" ${{ secrets.ALERT_TO }}

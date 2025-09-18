@@ -121,6 +121,9 @@ model User {
   clientFavorites    Favorite[] @relation("FavoriteClient")
   providerFavorites  Favorite[] @relation("FavoriteProvider")
   
+  // Safety Acceptances
+  safetyAcceptances UserSafetyAcceptance[]
+  
   @@map("users")
 }
 
@@ -507,6 +510,24 @@ model Certification {
   provider Provider @relation(fields: [providerId], references: [id], onDelete: Cascade)
 
   @@map("certifications")
+}
+
+// User Safety Disclaimer Acceptance
+model UserSafetyAcceptance {
+  id              String @id @default(cuid())
+  userId          String
+  acceptedAt      DateTime
+  providerId      String?
+  serviceId       String?
+  userAgent       String
+  ipAddress       String
+  metadata        Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_safety_acceptances")
 }
 
 // Portfolio items
