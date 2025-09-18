@@ -89,6 +89,7 @@
     "checklist": "node scripts/production-deployment-checklist.js"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.2.2",
     "@opentelemetry/api": "^1.9.0",
     "@opentelemetry/auto-instrumentations-node": "^0.62.1",
     "@opentelemetry/exporter-trace-otlp-http": "^0.203.0",
@@ -130,19 +131,22 @@
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.544.0",
     "next": "^14.2.0",
+    "next-auth": "^4.24.11",
     "otplib": "^12.0.1",
     "prisma": "^5.12.0",
     "qrcode": "^1.5.3",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-hook-form": "^7.62.0",
     "react-native": "^0.74.7",
     "react-native-web": "^0.19.13",
+    "sonner": "^2.0.7",
     "stripe": "^14.0.0",
     "swr": "^2.2.0",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.13",
     "twilio": "^5.8.0",
-    "zod": "^3.22.4"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@asamuzakjp/css-color": "^4.0.4",
