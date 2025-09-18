@@ -646,22 +646,4 @@ model APIKeyUsage {
   apiKey APIKey @relation(fields: [keyId], references: [id], onDelete: Cascade)
 
   @@map("api_key_usage")
-}
-
-model RefreshToken {
-  id          String   @id @default(cuid())
-  token       String   @unique
-  userId      String
-  jti         String   @unique // JWT ID for token identification
-  expiresAt   DateTime
-  isRevoked   Boolean  @default(false)
-  revokedAt   DateTime?
-  userAgent   String?
-  ipAddress   String?
-  createdAt   DateTime @default(now())
-  lastUsedAt  DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("refresh_tokens")
 } 

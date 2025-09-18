@@ -170,3 +170,4 @@ prisma/migrations/
 
 # Long filename issues (Windows)
 .yarn/unplugged/
+.vercel

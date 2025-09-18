@@ -64,7 +64,6 @@
     "ci:test": "yarn test:ci",
     "ci:build": "yarn build",
     "ci:all": "yarn ci:lint && yarn ci:test && yarn ci:build",
-
     "release": "standard-version",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
     "monitor:performance": "node scripts/performance-monitor.js",
@@ -81,7 +80,13 @@
     "test:local": "node scripts/test-local-deployment.js",
     "test:local:full": "npm run dev & sleep 10 && npm run test:local && kill %1",
     "start:clean": "node scripts/start-clean.js",
-    "dev:clean": "node scripts/start-clean.js"
+    "dev:clean": "node scripts/start-clean.js",
+    "build:production": "node scripts/build-production.js",
+    "setup:database": "node scripts/setup-production-db.js",
+    "deploy:production": "npm run build:production && npm run deploy:vercel:simple",
+    "validate:production": "npm run setup:database && npm run build:production",
+    "deploy:final": "node scripts/deploy-final.js",
+    "checklist": "node scripts/production-deployment-checklist.js"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",
@@ -123,6 +128,7 @@
     "expo": "53.0.20",
     "i18next": "^3.0.0",
     "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^0.544.0",
     "next": "^14.2.0",
     "otplib": "^12.0.1",
     "prisma": "^5.12.0",
@@ -134,6 +140,7 @@
     "stripe": "^14.0.0",
     "swr": "^2.2.0",
     "tailwind-merge": "^3.3.1",
+    "tailwindcss": "^4.1.13",
     "twilio": "^5.8.0",
     "zod": "^3.22.4"
   },

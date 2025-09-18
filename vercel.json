@@ -1,17 +1,5 @@
 {
   "version": 2,
-  "name": "beauty-crafter",
-  "alias": ["beauty-crafter.vercel.app"],
-  "regions": ["iad1", "sfo1", "lhr1", "hnd1", "syd1"],
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next",
-      "config": {
-        "maxLambdaSize": "50mb"
-      }
-    }
-  ],
   "functions": {
     "app/api/**/*.ts": {
       "maxDuration": 30
